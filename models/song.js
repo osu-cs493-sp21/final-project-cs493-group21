@@ -3,6 +3,48 @@ const bcrypt = require('bcryptjs');
 
 const { extractValidFields } = require('../lib/validation');
 
+/*
+ * Schema for a Song.
+ */
+const SongSchema = {
+        title: { required: true },
+        duration: { required: true },
+        lyrics: { required: true },
+        genre: {required: true},
+        artistid: {required: true},
+        spotify_URL: {required: true}                           
+};
+
+exports.SongSchema = SongSchema;
+
+exports.saveAudioFile = async (song) => {
+        const [ result ] = await mysqlPool.query(
+                'INSERT INTO songs SET ?',
+                song
+              );
+        return result.insertId;
+        // return new Promise((resolve, reject) => {
+        //   const db = getDBReference();
+        //   const bucket = new GridFSBucket(db, { bucketName: 'songs' });
+        //   const metadata = {
+        //     contentType: song.contentType,
+        //     artistid: song.artistid,
+        //     spotify_URL: song.spotify_URL
+        //   };
+      
+        //   const uploadStream = bucket.openUploadStream(
+        //     song.filename,
+        //     { metadata: metadata }
+        //   );
+        //   fs.createReadStream(song.path).pipe(uploadStream)
+        //   .on('error', (err) => {
+        //     reject(err)
+        //   })
+        //   .on('finish', (result) => {
+        //     resolve(result._id);
+        //   });
+        // });
+};
 
 /*
  * Fetch a song from the DB based on song ID.

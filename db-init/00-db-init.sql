@@ -46,8 +46,46 @@ INSERT INTO `users` VALUES
   (3,'Tanner Rousseau','rousseat@oregonstate.edu','$2a$08$WvRkJm.bz3zoRnmA.aQZBewLopoe00nA4qbzbnLyS4eRbm2MFNkMO',0),
   (4,'Derek Jeong','jeongju@oregonstate.edu','$2a$08$FBStm3plzBCnh/MPIUsJ0.f7kJkp6aH47haXHb3HY.Gfygan7e8He',0)
   ;
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+/*!40000 ALTER TABLE `artists` ENABLE KEYS */;
 UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `artists`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `artists` (
+  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `category` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+LOCK TABLES `artists` WRITE;
+/*!40000 ALTER TABLE `artists` DISABLE KEYS */;
+INSERT INTO `artists` VALUES
+  (0,'Post Malone', 'Hip hop')
+  ;
+/*!40000 ALTER TABLE `artists` ENABLE KEYS */;
+UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `songs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `songs` (
+  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `duration` varchar(255) NOT NULL,
+  `lyrics` text NOT NULL,
+  `genre` varchar(255) NOT NULL,
+  `artistid` mediumint(9) NOT NULL,
+  -- `file` BLOB NOT NULL,
+  `Spotify_URL` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_artistid` (`artistid`),
+  CONSTRAINT `songs_ibfk_1` FOREIGN KEY (`artistid`) REFERENCES `artists` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
