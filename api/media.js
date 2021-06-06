@@ -1,29 +1,29 @@
 const router = require('express').Router();
-const {Howl, Howler} = require('howler');
 
-const { requireAuthentication } = require('../lib/auth');
-const { getSongByArtistAndTitle,
-        getSongDownloadStreamByFilename
+const { getSongDownloadStreamByFilename,
+        streamSongById
  } = require('../models/song');
 
-router.get('/songs/:artistid/:title', async (req, res, next) => {
-        var artistid = req.params.artistid;
-        var title = req.params.title;
+router.get('/songs/:songid', async (req, res, next) => {
+        var songid = req.params.songid;
         
-        console.log("== [GET] artistid:", artistid);
-        console.log("== [GET] title:", title);
+        console.log("== [GET] songid:", songid);
         try {
-          const song = await getSongByArtistAndTitle(artistid, title);
-          console.log("== [GET] song:", song.Spotify_URL);
+          const song = await streamSongById(songid);
+          console.log("== [GET] song:", song);
 
-          var sound = new Howl({
-                  src: ['C:/CS493/final-project-cs493-group21/api/uploads/c9a06b81e8176350b796341d5be923fc.mp3']
-                ,autoplay: true
-                });
-          sound.play();
-          res.status(200).send({
-                uri: song.Spotify_URL
-          });
+          const downloadstream = await getSongDownloadStreamByFilename(song);           // await is crucial to fix .on bug
+          downloadstream.on('file', (file) => {
+            res.status(200).type(file.metadata.contentType);
+          })
+          .on('error', (err) => {
+            if (err.code === 'ENOENT') {
+              next();
+            } else {
+              next(err);
+            }
+          })
+          .pipe(res);
           } catch (err) {
             console.error(err);
             res.status(500).send({

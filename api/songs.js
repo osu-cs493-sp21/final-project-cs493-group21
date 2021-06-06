@@ -9,6 +9,7 @@ const { generateAuthToken, requireAuthentication, requireAuthentication_createUs
 
 const { SongSchema,
         saveAudioFile,
+        getSongInfoById,
         getSongById } = require('../models/song');
 const { validateAgainstSchema } = require('../lib/validation');
 
@@ -79,12 +80,22 @@ router.post('/', upload.single('song'), async (req, res) => {
         }
 });
 
-router.get('/:id', requireAuthentication, async (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
         console.log("requested song id:", req.params.id);
         try {
-                const song = await getSongById(parseInt(req.params.id));
+                const song = await getSongInfoById(req.params.id);
                 if (song) {
-                  res.status(200).send(song);
+                        const responseBody = {
+                                _id: song._id,
+                                filename: song.filename,
+                                url: `/media/songs/${song._id}`,
+                                contentType: song.metadata.contentType,
+                                artistid: song.metadata.artistid,
+                                lyrics: song.metadata.lyrics,
+                                duration: song.metadata.duration,
+                                genre: song.metadata.genre
+                }
+                        res.status(200).send(responseBody);
                 } else {
                   next();
                 }
