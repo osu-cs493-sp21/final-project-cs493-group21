@@ -3,6 +3,7 @@ const router = require('express').Router();
 const multer = require('multer');
 const crypto = require('crypto');
 const mm = require('music-metadata');
+const fs = require('fs');
 
 const { generateAuthToken, requireAuthentication, requireAuthentication_createUser } = require('../lib/auth');
 
@@ -13,18 +14,19 @@ const { validateAgainstSchema } = require('../lib/validation');
 
 const acceptedFileTypes = {
   'audio/mp3': 'mp3',
-  'audio/wav': 'wav'
+  'audio/wav': 'wav',
+  'audio/mpeg': 'mp3'
 };
 
 const upload = multer({
   storage: multer.diskStorage({
     destination: `${__dirname}/uploads`,
     filename: (req, file, callback) => {
-      const filename = file.originalname;
-      console.log(filename)
-      const extension = acceptedFileTypes[file.mimetype];
-      console.log(extension)
-      callback(null, `${filename}.${extension}`); 
+        const filename = crypto.pseudoRandomBytes(16).toString('hex');
+        console.log(filename, file.mimetype)
+        const extension = acceptedFileTypes[file.mimetype];
+        console.log(extension)
+        callback(null, `${filename}.${extension}`); 
     }
   }),
   fileFilter: (req, file, callback) => {
@@ -37,15 +39,16 @@ const upload = multer({
 /*
  * Route to create a new song.
  */
-router.post('/', upload.single('file'), async (req, res) => {
+router.post('/', upload.single('song'), async (req, res) => {
         console.log("== req.body:", req.body);
-        // console.log("== req.file:", req.file);
+        console.log("== req.file:", req.file);
       
-        if (validateAgainstSchema(req.body, SongSchema)) {
+        if (validateAgainstSchema(req.body, SongSchema) && req.file) {
           const song = {
-        //     contentType: req.file.mimetype,
-        //     filename: req.file.filename,
-        //    path: req.file.path,
+                file: req.file,
+                contentType: req.file.mimetype,
+                filename: req.file.filename,
+                path: req.file.path,
                 title: req.body.title,
                 duration: req.body.duration,
                 lyrics: req.body.lyrics,
@@ -66,7 +69,7 @@ router.post('/', upload.single('file'), async (req, res) => {
           } catch (err) {
             console.error(err);
             res.status(500).send({
-              error: "Error inserting song into DB.  Please try again later."
+              error: "Error inserting song into DB. Please try again later."
             });
           }
         } else {
@@ -88,7 +91,7 @@ router.get('/:id', requireAuthentication, async (req, res, next) => {
               } catch (err) {
                 console.error(err);
                 res.status(500).send({
-                  error: "Unable to fetch song data.  Please try again later."
+                  error: "Unable to fetch song data. Please try again later."
                 });
               }
 });

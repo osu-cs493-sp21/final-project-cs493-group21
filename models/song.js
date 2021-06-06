@@ -1,5 +1,6 @@
 const mysqlPool = require('../lib/mysqlPool');
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
 
 const { extractValidFields } = require('../lib/validation');
 
@@ -54,10 +55,30 @@ exports.getSongById = async function (id) {
           "SELECT * FROM songs WHERE id=?",
           [id]
         );
-        console.log("getUserbyId: ",result[0][0]);
+        console.log("getSongbyId: ",result[0][0]);
         if (result[0].length < 1){
           throw new Error("ID is not valid in DB");
         } else {
         return result[0][0];
       }
+};
+
+exports.getSongByArtistAndTitle = async function (artistid, title){
+  const result = await mysqlPool.query(
+    "SELECT * FROM songs WHERE artistid=? AND title=?",
+    [artistid, title]
+  );
+  console.log("getSongByArtistAndTitle: ",result[0][0]);
+  return result[0][0]
+};
+
+exports.getSongDownloadStreamByFilename = async (filename) => {
+  const result = await mysqlPool.query(
+    "SELECT * FROM songs WHERE filename=?",
+    [filename]
+  );
+  console.log(result);
+  // var buff = Buffer.from(result[0][1]._buf, 'base64');
+  // return fs.writeFileSync('test.mp3', buff); 
+  return result[0][0].path
 };
