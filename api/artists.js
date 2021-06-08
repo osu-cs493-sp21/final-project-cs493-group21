@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:id', (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
   try{
     const artist = await getArtistById(req.params.id);
     if (artist) {
