@@ -3,8 +3,9 @@ const router = require('express').Router();
 const { getSongDownloadStreamByFilename,
         streamSongById
  } = require('../models/song');
-
-router.get('/songs/:songid', async (req, res, next) => {
+ const { generateAuthToken, requireAuthentication, requireAuthentication_createUser } = require('../lib/auth');
+ 
+router.get('/songs/:songid', requireAuthentication, async (req, res, next) => {
         var songid = req.params.songid;
         
         console.log("== [GET] songid:", songid);

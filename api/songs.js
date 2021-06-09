@@ -10,6 +10,7 @@ const { generateAuthToken, requireAuthentication, requireAuthentication_createUs
 const { SongSchema,
         saveAudioFile,
         getSongInfoById,
+        getSongsPage,
         getSongById } = require('../models/song');
 const { validateAgainstSchema } = require('../lib/validation');
 
@@ -40,7 +41,7 @@ const upload = multer({
 /*
  * Route to create a new song.
  */
-router.post('/', upload.single('song'), async (req, res) => {
+router.post('/', requireAuthentication, upload.single('song'), async (req, res) => {
         console.log("== req.body:", req.body);
         console.log("== req.file:", req.file);
       
@@ -80,7 +81,35 @@ router.post('/', upload.single('song'), async (req, res) => {
         }
 });
 
-router.get('/:id', async (req, res, next) => {
+/*
+ * Route to return a paginated list of songs.
+ */
+router.get('/', requireAuthentication, async (req, res) => {
+  try {
+    /*
+     * Fetch page info, generate HATEOAS links for surrounding pages and then
+     * send response.
+     */
+    const songPage = await getSongsPage(parseInt(req.query.page) || 1);
+    songPage.links = {};
+    if (songPage.page < songPage.totalPages) {
+      songPage.links.nextPage = `/songs?page=${songPage.page + 1}`;
+      songPage.links.lastPage = `/songs?page=${songPage.totalPages}`;
+    }
+    if (songPage.page > 1) {
+      songPage.links.prevPage = `/songs?page=${songPage.page - 1}`;
+      songPage.links.firstPage = '/songs?page=1';
+    }
+    res.status(200).send(songPage);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      error: "Error fetching song list.  Please try again later."
+    });
+  }
+});
+
+router.get('/:id', requireAuthentication, async (req, res, next) => {
         console.log("requested song id:", req.params.id);
         try {
                 const song = await getSongInfoById(req.params.id);

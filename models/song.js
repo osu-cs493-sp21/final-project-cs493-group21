@@ -1,10 +1,8 @@
-const mysqlPool = require('../lib/mysqlPool');
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
 const { ObjectId, GridFSBucket } = require('mongodb');
 const { getDBReference } = require('../lib/mongo');
 const { extractValidFields } = require('../lib/validation');
-
 /*
  * Schema for a Song.
  */
@@ -18,6 +16,37 @@ const SongSchema = {
 };
 
 exports.SongSchema = SongSchema;
+
+exports.getSongsPage = async (page) => {
+  const db = getDBReference();
+  const bucket = new GridFSBucket(db, { bucketName: 'songs' });
+  const count = await db.collection('songs.files').countDocuments();
+  console.log("== count : ", count);
+
+  /*
+   * Compute last page number and make sure page is within allowed bounds.
+   * Compute offset into collection.
+   */
+  const pageSize = 10;
+  const lastPage = Math.ceil(count / pageSize);
+  page = page > lastPage ? lastPage : page;
+  page = page < 1 ? 1 : page;
+  const offset = (page - 1) * pageSize;
+
+  const results = await bucket.find({})
+    .sort({ _id: 1 })
+    .skip(offset)
+    .limit(pageSize)
+    .toArray();
+
+  return {
+    songs: results,
+    page: page,
+    totalPages: lastPage,
+    pageSize: pageSize,
+    count: count
+  };
+}
 
 exports.saveAudioFile = (song) => {
         // const [ result ] = await mysqlPool.query(
@@ -55,16 +84,6 @@ exports.saveAudioFile = (song) => {
  * Fetch a song from the DB based on song ID.
  */
 exports.getSongById = async function (id) {
-      //   const result = await mysqlPool.query(
-      //     "SELECT * FROM songs WHERE id=?",
-      //     [id]
-      //   );
-      //   console.log("getSongbyId: ",result[0][0]);
-      //   if (result[0].length < 1){
-      //     throw new Error("ID is not valid in DB");
-      //   } else {
-      //   return result[0][0];
-      // }
       const db = getDBReference();
       const collection = db.collection('songs');
       if (!ObjectId.isValid(id)) {
