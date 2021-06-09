@@ -14,7 +14,7 @@ router.post('/', requireAuthentication_createUser, async (req, res) => {
   if (req.user == null){
     Isadmin.admin = false;
   } else {
-    Isadmin = await getUserById(parseInt(req.user));
+    Isadmin = await getUserById(req.user);
   }
   console.log(Isadmin);
   
@@ -78,8 +78,8 @@ router.post('/login', async (req, res) => {
 // use next() to go to next functon
 router.get('/:id', requireAuthentication, async (req, res, next) => {
   console.log("logged-in id:",req.user, " requested id:", req.params.id);
-  const Isadmin = await getUserById(parseInt(req.user));
-  if ((parseInt(req.user) !== parseInt(req.params.id)) && (Isadmin.admin != true)) {
+  const Isadmin = await getUserById(req.user);
+  if ((req.user !== req.params.id) && (Isadmin.admin != true)) {
     res.status(403).send({
       error: "Unauthorized to access the specified resource"
     });
@@ -106,14 +106,14 @@ router.get('/:id', requireAuthentication, async (req, res, next) => {
  */
 router.get('/:id/playlists', requireAuthentication, async (req, res, next) => {
   console.log("logged-in id:",req.user, " requested id:", req.params.id);
-  const Isadmin = await getUserById(parseInt(req.user));
-  if ((parseInt(req.user) !== parseInt(req.params.id)) && (Isadmin.admin != true)) {
+  const Isadmin = await getUserById(req.user);
+  if ((req.user !== req.params.id) && (Isadmin.admin != true)) {
     res.status(403).send({
       error: "Unauthorized to access the specified resource"
     });
   } else {
     try {
-      const playlists = await getPlaylistByOwnerId(parseInt(req.params.id));
+      const playlists = await getPlaylistByOwnerId(req.params.id);
       if (playlists) {
         res.status(200).send({ playlists: playlists });
       } else {
