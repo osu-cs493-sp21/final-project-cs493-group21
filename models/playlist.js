@@ -33,6 +33,20 @@ exports.getPlaylistByID = async function (id){
       }
 };
 
+exports.getPlaylistsByUserID = async function (id){
+    const db = getDBReference();
+    console.log(id);
+      const collection = db.collection('playlists');
+      if (!ObjectId.isValid(id)) {
+        return null;
+      } else {
+        const results = await collection
+          .find({ _id: new ObjectId(id) })
+          .toArray();
+        return results[0];
+      } 
+}
+
 exports.addSongToPlaylist = async function (playlistID, songID){
     const db = getDBReference();
       const collection = db.collection('playlists');
@@ -78,9 +92,8 @@ exports.deletePlaylistByID = async function (id){
       return null;
     } else {
       const results = await collection
-        .remove({ _id: new ObjectId(id) })
-        .toArray();
-      return results[0];
+        .remove({ _id: new ObjectId(id) });
+      return results.result.n; //returns number of deleted playlists
     }
 
 };

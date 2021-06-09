@@ -74,13 +74,15 @@ router.get('/:id', async(req, res, next) => {
 /* 
 req.body{
     action: add, remove,
-    songs: [songid, songid]
+    songs: songid
 }
+
+action must be specified as add to correctly add to a playlist.
 */
 router.patch('/:id', async(req, res) => {
     if(req.body.action == 'add'){ //if we're adding a song
         try {
-            const playlist = await addSongToPlaylist(req.params.id, req.body.songs);
+            const playlist = await addSongToPlaylist(req.params.id, req.body.song);
             if (playlist) {
                     const responseBody = {
                             id: playlist.id,
@@ -103,7 +105,7 @@ router.patch('/:id', async(req, res) => {
           }
     }else{ //if we're removing a song
         try {
-            const playlist = await removeSongFromPlaylist(req.params.id, req.body.songs);
+            const playlist = await removeSongFromPlaylist(req.params.id, req.body.song);
             if (playlist) {
                     const responseBody = {
                             id: playlist.id,
@@ -131,9 +133,10 @@ router.patch('/:id', async(req, res) => {
 router.delete('/:id', async(req, res, next) => {
     try {
         const playlist = await deletePlaylistByID(req.params.id);
-        if (playlist) {
+        if (playlist >= 1) {
                 const responseBody = {
-                        playlist: playlist
+                        playlist: req.params.id,
+                        msg: "Playlist deleted."
         }
                 res.status(200).send(responseBody);
         } else {
