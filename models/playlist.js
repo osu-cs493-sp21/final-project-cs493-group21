@@ -92,7 +92,7 @@ exports.deletePlaylistByID = async function (id){
       return null;
     } else {
       const results = await collection
-        .remove({ _id: new ObjectId(id) });
+        .deleteOne({ _id: new ObjectId(id) });
       return results.result.n; //returns number of deleted playlists
     }
 

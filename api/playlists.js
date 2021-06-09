@@ -14,14 +14,16 @@ const { PlaylistSchema,
     removeSongFromPlaylist} = require('../models/playlist');
 
 const { validateAgainstSchema } = require('../lib/validation');
+const { validateUser, getUserById } = require('../models/user');
 
-router.post('/', async(req, res) => {
+router.post('/', requireAuthentication, async(req, res) => {
     console.log("== req.body:", req.body);
-  
+    const user = req.user;
+    console.log("== req.user", user);
     if (validateAgainstSchema(req.body, PlaylistSchema)) {
       const playlist = {
-            //id: req.body.id,
-            userid: req.body.userid,
+            //id: req.user,
+            userid: req.user,
             name: req.body.name,
             songs: req.body.songs
       }
@@ -79,7 +81,7 @@ req.body{
 
 action must be specified as add to correctly add to a playlist.
 */
-router.patch('/:id', async(req, res) => {
+router.patch('/:id', requireAuthentication, async(req, res) => {
     if(req.body.action == 'add'){ //if we're adding a song
         try {
             const playlist = await addSongToPlaylist(req.params.id, req.body.song);
@@ -130,7 +132,7 @@ router.patch('/:id', async(req, res) => {
 });
 
 
-router.delete('/:id', async(req, res, next) => {
+router.delete('/:id', requireAuthentication, async(req, res, next) => {
     try {
         const playlist = await deletePlaylistByID(req.params.id);
         if (playlist >= 1) {
