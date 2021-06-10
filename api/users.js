@@ -1,11 +1,12 @@
 const router = require('express').Router();
 
 const { generateAuthToken, requireAuthentication, requireAuthentication_createUser } = require('../lib/auth');
-const { UserSchema, 
-  insertNewUser, 
+const { UserSchema,
+  insertNewUser,
   getUserById,
   getUserID,
   validateUser } = require('../models/user');
+const { getPlaylistsByUserID  } = require('../models/playlist');
 const { validateAgainstSchema } = require('../lib/validation');
 
 
@@ -17,9 +18,9 @@ router.post('/', requireAuthentication_createUser, async (req, res) => {
     Isadmin = await getUserById(req.user);
   }
   console.log(Isadmin);
-  
+
   console.log("==req.body.admin:", req.body.admin);
-  
+
   if ((req.body.admin == true) && (Isadmin.admin != true)) {
     res.status(403).send({
       error: "Only admin account can create another admin account!"
@@ -113,7 +114,7 @@ router.get('/:id/playlists', requireAuthentication, async (req, res, next) => {
     });
   } else {
     try {
-      const playlists = await getPlaylistByOwnerId(req.params.id);
+      const playlists = await getPlaylistsByUserID(req.params.id);
       if (playlists) {
         res.status(200).send({ playlists: playlists });
       } else {
