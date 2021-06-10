@@ -110,14 +110,14 @@ exports.getSongInfoById = async function (id) {
 };
 
 //get song info by artist id
-exports.getSongInfoBy = async function (artistid){
+exports.getSongInfoBy = async function (id){
   const db = getDBReference();
   const bucket = new GridFSBucket(db, { bucketName: 'songs'});
-  if(!ObjectId.isValid(artistid)){
+  if(!ObjectId.isValid(id)){
     console.log(" !== artistid is not valid:", artistid);
     return null;
   } else {
-    const results = await bucket.find({ artistid: new ObjectId(artistid)}).toArray();
+    const results = await bucket.find({ artistid: id}).toArray();
     // console.log(" == results:", results);
     return results[0];
   }

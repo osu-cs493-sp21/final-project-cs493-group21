@@ -41,6 +41,9 @@ router.get('/:id', async (req, res, next) => {
   try{
     const artist = await getArtistById(req.params.id);
     if (artist) {
+      artist.links = {};
+      links.song = `artists/${req.params.id}/songs`;
+
       res.status(200).send(artist);
     } else {
       next();
@@ -53,7 +56,7 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-router.get('/:id', async (req, res, next) => {
+router.get('/:id/songs', async (req, res, next) => {
   try{
     const songs = await getSongInfoById(req.param.id);
     if (songs) {
