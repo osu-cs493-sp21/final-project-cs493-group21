@@ -59,7 +59,6 @@ async function getArtistById(id){
 }
 exports.getArtistById = getArtistById;
 
-
 async function insertNewArtist(artist) {
   artist = extractValidFields(artist, ArtistSchema);
   const db = getDBReference();
