@@ -1,11 +1,7 @@
-<<<<<<< HEAD
-const { getArtistsPage, getArtistById } = require('../models/artist');
-const { getSongInfoById } = require('../models/song');
-
-=======
+const { getSongsByArtist } = require('../models/song');
 const { getArtistsPage, getArtistById, ArtistSchema, insertNewArtist } = require('../models/artist');
 const { validateAgainstSchema } = require('../lib/validation');
->>>>>>> master
+
 const router = require('express').Router();
 
 
@@ -47,7 +43,7 @@ router.get('/:id', async (req, res, next) => {
     const artist = await getArtistById(req.params.id);
     if (artist) {
       artist.links = {};
-      links.song = `artists/${req.params.id}/songs`;
+      artist.links.song = `/artists/${req.params.id}/songs`;
 
       res.status(200).send(artist);
     } else {
@@ -63,20 +59,19 @@ router.get('/:id', async (req, res, next) => {
 
 router.get('/:id/songs', async (req, res, next) => {
   try{
-    const songs = await getSongInfoById(req.param.id);
+    const songs = await getSongsByArtist(req.params.id);
     if (songs) {
-      res.status(200).send(artist);
+      res.status(200).send(songs);
     } else {
       next();
     }
   } catch (err) {
-    console.err(err);
+    console.error(err);
     res.status(500).send({
       error: "Error fetching songs by the given artist. Please try again later."
     });
   }
-}); 
-module.exports = router;
+});
 
 router.post('/', async (req, res, next) => {
   if(validateAgainstSchema(req.body, ArtistSchema)){

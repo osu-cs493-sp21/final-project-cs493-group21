@@ -12,7 +12,7 @@ const SongSchema = {
         lyrics: { required: true },
         genre: {required: true},
         artistid: {required: true},
-        spotify_URL: {required: true}                           
+        spotify_URL: {required: true}
 };
 
 exports.SongSchema = SongSchema;
@@ -65,7 +65,7 @@ exports.saveAudioFile = (song) => {
             duration: song.duration,
             genre: song.genre
           };
-      
+
           const uploadStream = bucket.openUploadStream(
             song.filename,
             { metadata: metadata }
@@ -110,16 +110,21 @@ exports.getSongInfoById = async function (id) {
 };
 
 //get song info by artist id
-exports.getSongInfoBy = async function (id){
+exports.getSongsByArtist = async function (id){
   const db = getDBReference();
   const bucket = new GridFSBucket(db, { bucketName: 'songs'});
   if(!ObjectId.isValid(id)){
-    console.log(" !== artistid is not valid:", artistid);
+    console.log(" !== artistid is not valid:", id);
     return null;
   } else {
-    const results = await bucket.find({ artistid: id}).toArray();
-    // console.log(" == results:", results);
-    return results[0];
+    const results = await bucket.find({ "metadata.artistid": id}).toArray();
+    console.log(" == results:", results);
+    var i;
+    var songids = [];
+    for( i = 0; i < results.length; i++){
+      songids[i] = results[i]._id;
+    }
+    return songids;
   }
 }
 
@@ -151,7 +156,7 @@ exports.getSongDownloadStreamByFilename = async (filename) => {
   // );
   // console.log(result);
   // // var buff = Buffer.from(result[0][1]._buf, 'base64');
-  // // return fs.writeFileSync('test.mp3', buff); 
+  // // return fs.writeFileSync('test.mp3', buff);
   // return result[0][0].path
   const db = getDBReference();
   const bucket = new GridFSBucket(db, { bucketName: 'songs' });
