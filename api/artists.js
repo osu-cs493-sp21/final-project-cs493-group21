@@ -1,10 +1,9 @@
-const { getArtistsPage, getArtistById } = require('../models/artist');
-const { getAlbumsByArtistId } = require('../models/album');
-
+const { getArtistsPage, getArtistById, ArtistSchema, insertNewArtist } = require('../models/artist');
+const { validateAgainstSchema } = require('../lib/validation');
 const router = require('express').Router();
 
 
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try{
     /*
      * Fetch page info about all artists
@@ -53,27 +52,27 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-/*
- * Endpoint for getting a list of album ids that belong to an artist
- */
-router.get('/:id/albums', async (req, res, next) => {
-  console.log("requested album by id:", req.params.id);
-  try {
-    const albums = await getAlbumsByArtistId(req.params.id);
-    if (albums) {
-      const responseBody = {
-        artistid: req.params.id,
-        albumids: albums
-      }
-      res.status(200).send(responseBody);
-    } else {
-      next();
+router.post('/', async (req, res, next) => {
+  if(validateAgainstSchema(req.body, ArtistSchema)){
+
+    try {
+      const id = await insertNewArtist(req.body);
+      res.status(201).send({
+        id: id,
+        links: {
+          artist: `/artists/${id}`,
+        }
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({
+        error:  "Error inserting artist into DB.  Please try again later."
+      })
     }
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({
-      error: "Unable to fetch albums for that artist.  Please try again later."
-    })
+  } else {
+    res.status(400).send({
+      error: "Request body is not a valid artist object"
+    });
   }
 });
 

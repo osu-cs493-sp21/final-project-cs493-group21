@@ -5,11 +5,12 @@ const { generateAuthToken,
 const { AlbumSchema,
         getAlbumById,
         insertNewAlbum } = require('../models/album');
+const { getUserById } = require('../models/user');
 const { validateAgainstSchema } = require('../lib/validation');
-//admin auth
+
 //router.post()
-//router.post('/', requireAuthentication, async (req, res, next) => {
-router.post('/', async (req, res, next) => {
+router.post('/', requireAuthentication, async (req, res, next) => {
+
   if(validateAgainstSchema(req.body, AlbumSchema)){
     const album = {
       name: req.body.name,
@@ -39,8 +40,7 @@ router.post('/', async (req, res, next) => {
   }
 })
 
-//admin auth
-//router.patch()
+
 
 router.get('/:id', async (req, res, next) => {
   console.log("requested album by id:", req.params. id);

@@ -9,7 +9,7 @@ const { SongSchema,
 const { PlaylistSchema,
     createPlaylist,
     getPlaylistByID,
-    deletePlaylistByID, 
+    deletePlaylistByID,
     addSongToPlaylist,
     removeSongFromPlaylist} = require('../models/playlist');
 
@@ -17,6 +17,7 @@ const { validateAgainstSchema } = require('../lib/validation');
 const { validateUser, getUserById } = require('../models/user');
 
 router.post('/', requireAuthentication, async(req, res) => {
+  if(req.user == req.body.userid){
     console.log("== req.body:", req.body);
     const user = req.user;
     console.log("== req.user", user);
@@ -46,6 +47,11 @@ router.post('/', requireAuthentication, async(req, res) => {
         error: "Request body is not a valid playlist object"
       });
     }
+  } else {
+    res.status(403).send({
+      error: "Unauthorized to access the specified resource"
+    });
+  }
 });
 
 
@@ -73,7 +79,7 @@ router.get('/:id', async(req, res, next) => {
 });
 
 
-/* 
+/*
 req.body{
     action: add, remove,
     songs: songid
@@ -82,6 +88,7 @@ req.body{
 action must be specified as add to correctly add to a playlist.
 */
 router.patch('/:id', requireAuthentication, async(req, res) => {
+  if(req.user == req.body.userid){
     if(req.body.action == 'add'){ //if we're adding a song
         try {
             const playlist = await addSongToPlaylist(req.params.id, req.body.song);
@@ -129,10 +136,16 @@ router.patch('/:id', requireAuthentication, async(req, res) => {
             });
           }
     }
+  } else {
+    res.status(403).send({
+      error: "Unauthorized to access the specified resource"
+    });
+  }
 });
 
 
 router.delete('/:id', requireAuthentication, async(req, res, next) => {
+  if(req.user == req.body.userid){
     try {
         const playlist = await deletePlaylistByID(req.params.id);
         if (playlist >= 1) {
@@ -150,6 +163,11 @@ router.delete('/:id', requireAuthentication, async(req, res, next) => {
           error: "Unable to delete playlist data. Please try again later."
         });
       }
+    } else {
+      res.status(403).send({
+        error: "Unauthorized to access the specified resource"
+      });
+    }
 });
 
 module.exports = router;

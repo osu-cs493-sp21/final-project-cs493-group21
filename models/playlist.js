@@ -41,10 +41,11 @@ exports.getPlaylistsByUserID = async function (id){
         return null;
       } else {
         const results = await collection
-          .find({ _id: new ObjectId(id) })
+          .find({ userid: id })
           .toArray();
-        return results[0];
-      } 
+        console.log("== Results:", results);
+        return results;
+      }
 }
 
 exports.addSongToPlaylist = async function (playlistID, songID){
