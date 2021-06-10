@@ -52,5 +52,5 @@ async function getArtistById(id){
 }
 exports.getArtistById = getArtistById;
 
-//add function to get the information about each of the artist albums
+//add function to get the information about each of the artist albums?
 //if information for that album exists on the database

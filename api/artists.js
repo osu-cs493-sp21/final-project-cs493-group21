@@ -1,4 +1,5 @@
 const { getArtistsPage, getArtistById } = require('../models/artist');
+const { getSongInfoById } = require('../models/song');
 
 const router = require('express').Router();
 
@@ -52,4 +53,19 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
+router.get('/:id', async (req, res, next) => {
+  try{
+    const songs = await getSongInfoById(req.param.id);
+    if (songs) {
+      res.status(200).send(artist);
+    } else {
+      next();
+    }
+  } catch (err) {
+    console.err(err);
+    res.status(500).send({
+      error: "Error fetching songs by the given artist. Please try again later."
+    });
+  }
+}); 
 module.exports = router;

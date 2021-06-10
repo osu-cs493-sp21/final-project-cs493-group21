@@ -109,6 +109,21 @@ exports.getSongInfoById = async function (id) {
   }
 };
 
+//get song info by artist id
+exports.getSongInfoBy = async function (artistid){
+  const db = getDBReference();
+  const bucket = new GridFSBucket(db, { bucketName: 'songs'});
+  if(!ObjectId.isValid(artistid)){
+    console.log(" !== artistid is not valid:", artistid);
+    return null;
+  } else {
+    const results = await bucket.find({ artistid: new ObjectId(artistid)}).toArray();
+    // console.log(" == results:", results);
+    return results[0];
+  }
+}
+
+
 exports.streamSongById = async function (id){
   // const result = await mysqlPool.query(
   //   "SELECT * FROM songs WHERE artistid=? AND title=?",
